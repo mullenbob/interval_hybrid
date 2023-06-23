@@ -1,0 +1,10 @@
+hybrid1opt particle swarm  one angle with range 0.785398
+ particle swarm solution min 1.9600000000e+02 max 2.0400000000e+02  fvalue min 3.1928499624e-05  time 2.577701e+00 cpu time 2.937500 function evals 2200
+ particle swarm solution min 1.9600000000e+02 max 2.0299595310e+02  fvalue max 6.5132974551e-05  time 3.079586e+00 cpu time 3.781250 function evals 4600
+
+Nodal information - optimization model
+Node   X      Y     Restraints       Fx          Fy           U-x    U-y
+ 1    0.0    0.0    0    0           0.0          0.0                    0               0
+ 2    1.0    0.0    1    0           0.0          0.0           2.4578648e-05               0
+ 3    0.0    0.8    1    1          10.0          0.0           6.7273431e-05      -7.5691753e-06
+ 4    1.0    0.8    1    1           0.0          0.0           4.7657395e-05      -1.1187376e-05

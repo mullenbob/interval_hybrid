@@ -37,7 +37,7 @@ format long;
 %set counter for evaluation of function
 iii=0;
 %set input and output file name
-name="popova1group";
+name="popova100group";
 %open files
 inp= fopen(name+'.inp','r');
 out =fopen(name+'_opt_ps.out','w');

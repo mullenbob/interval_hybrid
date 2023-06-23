@@ -1,7 +1,3 @@
-% hybrid method angel load with 2-d group truss   Not a general purpose
-% code
-% By Robert Mullen and Rafi Muhanna  2023-06-08
-% fix bug with y value of force not being multiplied by interval value
 clear
 clearvars -global
 
@@ -36,20 +32,18 @@ global beta;
 format long;
 %set counter for evaluation of function
 iii=0;
-%set input and output file name
-name="popova5group";
-%open files
+name="popova5group"
+
 inp= fopen(name+'.inp','r');
 out =fopen(name+'optga.out','w');
-% reed in model data for truss using function in this file
+
+
 readtrussx(inp,out);
-%allocate space for optimizaation program with an added angle value
-nvars=nel+nintvgroup+nintvload+1;
-lb=zeros(nvars,1);
+lb=zeros(nel+nintvgroup+nintvload,1);
 ub=lb;
 x0=lb;
 
-%set initial values for modulus in optimization by scaling
+ %set initial values for modulus values
 for i1=1:nel
     x0(i1)=tE(i1)/1.E+6;
     lb(i1)=x0(i1)*(1.-alphaA(i1)); 
@@ -71,29 +65,26 @@ for i1=1:nintvload
     ub(i2)=(1.+beta(i1));
 end
 end
-%set angle range
-arange=pi/4.; 
-% set to +/ 45 degrees
-x0(nvars)=0;
-lb(nvars)=-arange;
-ub(nvars)=arange;
-fprintf(out,'hybrid1optga genitic algorthim  one angle with range %f\n',arange);
-% start analysis clock
 tic
-starttime=cputime();
 A=[];
 Aeq=[];
 b=[];
 beq=[];
-iii=0;
+disp=trusssolve(x0)/10000.  % centered value check
+tic
+%options = optimoptions('fmincon','Algorithm','interior-point','Display','iter','MaxFunctionEvaluations',30000000);
+%options = optimoptions('fmincon','PlotFcn','optimplotconstrviolation','Algorithm','sqp','Display','iter','MaxFunctionEvaluations',30000000);
+%[x,fval,exitflag,output] = fmincon(@funx,x0,A,b,Aeq,beq,lb,ub,@nonlcon,options);
+nvars=nel+nintvload+nintvgroup
+
 options = optimoptions('ga','ConstraintTolerance',1e-6,'FunctionTolerance',1.e-10);
 [x,fval,exitflag,output,population,scores] = ga(@funx,nvars,A,b,Aeq,beq,lb,ub,@nonlcon,options) ;%defines a set of lower and upper bounds on the design variables, x, so that a solution is found in the range lbxub. (Set Aeq=[] and beq=[] if no linear equalities exist.)
-
-fprintf(out,' ga solution min %15.10e max %15.10e  fvalue min %15.10e  time %s cpu time %f function evals %d\n', min(x(1:nel)),max(x(1:nel)),fval,toc,cputime-starttime,iii);
-
+x(nvars)
+fprintf(out,' ga solution min %15.10e max %15.10e  fvalue min %15.10e  time %s function evals %d\n', min(x(1:nel)),max(x(1:nel)),fval/10000.,toc,iii);
+iii=0;
+tic;
 [x,fval,exitflag,output,population,scores] = ga(@funy,nvars,A,b,Aeq,beq,lb,ub,@nonlcon,options) ;%defines a set of lower and upper bounds on the design variables, x, so that a solution is found in the range lbxub. (Set Aeq=[] and beq=[] if no linear equalities exist.)
-fprintf(out,' ga solution min %15.10e max %15.10e  fvalue max %15.10e  time %s cputime %f function evals %d\n', min(x(1:nel)),max(x(1:nel)),-fval,toc, cputime-starttime,iii);
-
+fprintf(out,' ga solution min %15.10e max %15.10e  fvalue max %15.10e  time %s function evals %d\n', min(x(1:nel)),max(x(1:nel)),-fval/10000.,toc,iii);
 fprintf(out,'\nNodal information - optimization model\n');
 fprintf(out,'Node   X      Y     Restraints       Fx          Fy           U-x    U-y\n');
 ii=1;
@@ -102,19 +93,25 @@ for i=1:nnd
     
      fprintf(out,'%2d   %4.1f   %4.1f    %d    %d     %9.1f    %9.1f           %10.8g      %10.8g\n',i,tx(i),ty(i),resxA(i),resyA(i),fxA(i),fyA(i),delta(ii),delta(ii+1)); 
 ii=ii+2;
-end    
-function [c,ceq] = nonlcon(x);
+end
+
+
+    function [c,ceq] = nonlcon(x);
 c = [];
 ceq = [ ];
 end
-
-function disp=funx(optin)
+function disp=funx(optin);
 global iii;
 iii=iii+1;
+% if (mod(iii,1000)== 0)
+%    
+% min(optin)
+% max(optin)
+% end
 disp=trusssolve(optin);
 return
 end
-function disp=funy(optin)
+function disp=funy(optin);
 global iii;
 iii=iii+1;
 
@@ -122,7 +119,7 @@ disp=-trusssolve(optin);
 return
 end
 function readtrussx(inp,out)
-
+   
 % set up global variables to exchange inifor between functions
 
 global tx;
@@ -156,9 +153,9 @@ global beta;
 % read in data in same forame as 
                                                                             
 [mat1] = fscanf(inp,'%d',2);
-nnd= mat1(1); %number of nodes - assembled model
-nel  = mat1(2); %number of elements
-ndof=2*nnd;
+nnd= mat1(1) %number of nodes - assembled model
+nel  = mat1(2) %number of elements
+ndof=2*nnd
 
 %x and y coodinates of nodes for assembled model
 tx = zeros(nnd,1);
@@ -254,7 +251,7 @@ global nintvgroup;
 global groupid;
 global nodeid;
 global beta;
-angle=optvar(nel+nintvgroup+nintvload+1);
+
 K=zeros(ndof);
   %assenble stiffness matrix
   for e=1:nel
@@ -309,21 +306,19 @@ end
 ii=0;
 for i=1:nnd
 ii=ii+1;
-% modified for angle  load
-force(ii)=fxA(i)*cos(angle)+fyA(i)*sin(angle);
+force(ii)=fxA(i);
 ii=ii+1;
-force(ii)=fyA(i)*cos(angle)-fxA(i)*sin(angle);
+force(ii)=fyA(i);
 end
 if (nintvload > 0)
 for i=1:nintvload
      i2=i+nel+nintvgroup;
    
-    ii=nodeid(i);  % problem with y force not being multipled by interval valus  ife 6-22-2023  RLM
+    ii=nodeid(i);
     force(ii)=force(ii)*optvar(i2);
-    force(ii+1)=force(ii+1)*optvar(i2);   % RLM FIX
 end
 end
 delta=K\force';
-temp=delta(2*nnd-1);
+temp=delta(2*nnd-1)*10000;
 return  
 end
