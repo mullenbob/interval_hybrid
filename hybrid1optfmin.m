@@ -1,22 +1,21 @@
-% hybrid method angel load with 2-d group truss   Not a general purpose
-% code
+% hybrid method angle load with 2-d group truss
 % By Robert Mullen and Rafi Muhanna  2023-06-08
-% fix bug with y value of force not being multiplied by interval value
+%  fix problem with only lond in x direction being multiplid by the
+%  interval load value  2023-06-22
 clear
 clearvars -global
 
 global tx;
 global ty;
-global force;
+
 global fxA;
 global fyA;
 global iii;
 global nnd
 global nel
-global ndof
-global telement
+
 global tE;
-global tA;
+
 global resxA;
 global resyA;
 global delta;
@@ -40,7 +39,7 @@ iii=0;
 name="popova100group";
 %open files
 inp= fopen(name+'.inp','r');
-out =fopen(name+'optga.out','w');
+out =fopen(name+'_opt_fmin.out','w');
 % reed in model data for truss using function in this file
 readtrussx(inp,out);
 %allocate space for optimizaation program with an added angle value
@@ -72,27 +71,30 @@ for i1=1:nintvload
 end
 end
 %set angle range
-arange=pi/4.; 
+arange=pi/4.;
+
 % set to +/ 45 degrees
 x0(nvars)=0;
 lb(nvars)=-arange;
 ub(nvars)=arange;
-fprintf(out,'hybrid1optga genitic algorthim  one angle with range %f\n',arange);
+fprintf(out,'hybrid1opt fmincon one angle with range %f\n',arange);
 % start analysis clock
 tic
-starttime=cputime();
+starttime=cputime;
 A=[];
-Aeq=[];
 b=[];
+Aeq=[];
 beq=[];
+%disp=trusssolve(x0);  % centered value check
+
+options = optimoptions('fmincon','Algorithm','interior-point','Display','iter','MaxFunctionEvaluations',30000000,'Maxiterations',10000);
+%options = optimoptions('fmincon','PlotFcn','optimplotconstrviolation','Algorithm','sqp','Display','iter','MaxFunctionEvaluations',30000000);
 iii=0;
-options = optimoptions('ga','ConstraintTolerance',1e-6,'FunctionTolerance',1.e-10);
-[x,fval,exitflag,output,population,scores] = ga(@funx,nvars,A,b,Aeq,beq,lb,ub,@nonlcon,options) ;%defines a set of lower and upper bounds on the design variables, x, so that a solution is found in the range lbxub. (Set Aeq=[] and beq=[] if no linear equalities exist.)
+[x,fval,exitflag,output] = fmincon(@funx,x0,A,b,Aeq,beq,lb,ub,@nonlcon,options);
 
-fprintf(out,' ga solution min %15.10e max %15.10e  fvalue min %15.10e  time %s cpu time %f function evals %d\n', min(x(1:nel)),max(x(1:nel)),fval,toc,cputime-starttime,iii);
-
-[x,fval,exitflag,output,population,scores] = ga(@funy,nvars,A,b,Aeq,beq,lb,ub,@nonlcon,options) ;%defines a set of lower and upper bounds on the design variables, x, so that a solution is found in the range lbxub. (Set Aeq=[] and beq=[] if no linear equalities exist.)
-fprintf(out,' ga solution min %15.10e max %15.10e  fvalue max %15.10e  time %s cputime %f function evals %d\n', min(x(1:nel)),max(x(1:nel)),-fval,toc, cputime-starttime,iii);
+fprintf(out,' fmincon solution min %15.10e max %15.10e  fvalue min %15.10e  time %s cpu time %f function evals %d\n', min(x(1:nel)),max(x(1:nel)),fval,toc,cputime-starttime,iii);
+[x,fval,exitflag,output] = fmincon(@funy,x0,A,b,Aeq,beq,lb,ub,@nonlcon,options);
+fprintf(out,' particle swarm solution min %15.10e max %15.10e  fvalue max %15.10e  time %s cpu time %f function evals %d\n', min(x(1:nel)),max(x(1:nel)),-fval,toc,cputime-starttime,iii);
 
 fprintf(out,'\nNodal information - optimization model\n');
 fprintf(out,'Node   X      Y     Restraints       Fx          Fy           U-x    U-y\n');
@@ -102,15 +104,15 @@ for i=1:nnd
     
      fprintf(out,'%2d   %4.1f   %4.1f    %d    %d     %9.1f    %9.1f           %10.8g      %10.8g\n',i,tx(i),ty(i),resxA(i),resyA(i),fxA(i),fyA(i),delta(ii),delta(ii+1)); 
 ii=ii+2;
-end    
-function [c,ceq] = nonlcon(x)
-c = [];
-ceq = [ ];
 end
-
 function disp=funx(optin)
 global iii;
 iii=iii+1;
+% if (mod(iii,1000)== 0)
+%    
+% min(optin)
+% max(optin)
+% end
 disp=trusssolve(optin);
 return
 end
@@ -318,12 +320,17 @@ if (nintvload > 0)
 for i=1:nintvload
      i2=i+nel+nintvgroup;
    
-    ii=nodeid(i);  % problem with y force not being multipled by interval valus  ife 6-22-2023  RLM
+    ii=nodeid(i); %  note for the problem set with angle loads on x braced frame
+    % must use x beta value in the optvar to apply to both x an y values
     force(ii)=force(ii)*optvar(i2);
-    force(ii+1)=force(ii+1)*optvar(i2);   % RLM FIX
+    force(ii+1)=force(ii+1)*optvar(i2);    % RLM 2023/6/22
 end
 end
 delta=K\force';
 temp=delta(2*nnd-1);
 return  
+end
+function [c,ceq] = nonlcon(x)
+c = [];
+ceq = [ ];
 end

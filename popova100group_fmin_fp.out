@@ -1,7 +1,6 @@
-hybrid1 particle swarm - sensitivity one angle with range 0.785398
-   Run on : 14-Sep-2023 12:15:28
-Program hybrid interval  particle swarm - sensitivity 
- input file name popova100group 
+hybrid1 fmin - fixed point one angle with range 0.785398
+ Run on : 14-Sep-2023 14:01:39 
+File name popova100group 
 Nodal information - Assembled  model
 Node   X      Y     Restraints       Fx          Fy           beta-x    beta-y
  1    0.0    0.0    0    0           0.0          0.0           0.000      0.000
@@ -555,7 +554,5 @@ Group Number        Group Uncertainty
  2                       0.00980    
  3                       0.00980    
  4                       0.00980    
-hybrid1 particle swarm - sensitivity one angle with range 0.785398
-   Run on : 14-Sep-2023 12:15:28
- particle swarm solution angle  7.8539816340e-01   fvalue min 4.4050767195e-05  time 3.154155e+00 cputime 24.203125 function evals 220
- particle swarm solution angle  -3.1346979320e-01   fvalue min 1.1454760399e-04  time 6.370991e+00 cputime 47.718750  function evals 440
+ fmin fp solution min 7.8490895463e-01 max 7.8490895463e-01  fvalue min 4.1361839000e-05  time 4.592799e+00 cpu time 25.015625 function evals 27
+ Fmin fp solution min -3.1069003016e-01 max -3.1069003016e-01  fvalue max 1.1474882351e-04  time 7.838218e+00 cputime 43.656250 function evals 47

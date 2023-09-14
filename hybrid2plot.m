@@ -15,9 +15,9 @@ global ne;
 global ndof1;
 tic
 %intvalinit('DisplayInfsup');
-name="popova1group";
+name="popova100group";
 inp= fopen(name+'.inp','r');
-out =fopen(name+'1_plot.out','w');
+out =fopen(name+'_1_plot.out','w');
 fid=out;
 readtrussx(name,inp,out);
 
@@ -26,7 +26,7 @@ ndof1=nnA*2;
 nvars=1;
 %set angle range
 arange=pi/4.; 
-npoints=500;
+npoints=5000;
 % set to +/ 45 degrees
 angle=-arange;
 delt_angle=2*arange/(npoints-1);
@@ -50,16 +50,22 @@ for i1=1:npoints
         amax1=angle;
     end
     angle=angle+delt_angle;
+
 end
 fprintf(out,' using %d points the minimum is at %5.10f with a value of %5.10e \n',npoints,amin1,ymax2);
 fprintf(out,' using %d points the maximum is at %5.10f with a value of %5.10e \n',npoints,amax1,ymax1);
 amax1
 amin1
+min(y1plot)
+max(y2plot)
 plot(xplot,y1plot,xplot,y2plot);
 title(name);
 xlabel('angle, rad');
 ylabel('displacement, M');
-
+out=fopen('papova1_all_angle_5000.csv','w');
+ for i1=1:5000
+fprintf(out,'%g20.10, %g20.10,\n',y1plot(i1),y2plot(i1));
+end
 
 
 
@@ -363,7 +369,7 @@ for i1=1:nintvload
   % added for angle problem
     forcetemp(i2+1)=forcetemp(i2+1)*(1+beta(i1)*L(2*nnd-1,nel+nintvgroup+i1));
 end
-R2=inv(KK2)*forcetemp;
+R2=KK2\forcetemp;
 %lower bound
 Dint=diag(D1);
 if nintvgroup == 0
@@ -422,7 +428,7 @@ for i1=1:nintvload
     forcetemp(i2+1)=forcetemp(i2+1)*(1-beta(i1)*L(2*nnd-1,nel+nintvgroup+i1));
    %  added for angle problem
 end
-R3=inv(KK2)*forcetemp;
+R3=KK2\forcetemp;
 
 disp=[R2(2*nnd-1),R3(2*nnd-1)];
 return  

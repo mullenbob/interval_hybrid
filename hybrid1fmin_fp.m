@@ -42,12 +42,14 @@ global iii;
 tic
 starttime=cputime;
 intvalinit('DisplayInfsup');
-name="popova1group";
+name="popova100group";
 inp= fopen(name+'.inp','r');
-out =fopen(name+'_ps_fp.out','w');
+out =fopen(name+'_fmin_fp.out','w');
 strainflag=0;   % if set to one, strains will also be calculated
 fid=out;
-
+%set angle range
+arange=pi/4.; 
+fprintf(out,'hybrid1 fmin - fixed point one angle with range %f\n Run on : %s \n',arange,datetime('now'));
 [nn,nnA,ne,xA,yA,ndof,ndofA, resxA,resyA,fxA,fyA,BetaxA,BetayA, ...
     A,E,elementA,alfaA,ng,Gamma,betaxA,betayA,Alfa,gammao,gn,gamma1]=readtruss2(name,inp,out);
 ivalue=8;
@@ -64,30 +66,36 @@ nforce=0;  % not used anymore
  option= 2;  % no combinations run
 %outifep2(fid,strainflag,option,nnA,ndof,ndofA,ndofnew,ng,gamma1,gn,ne,elementA,Alfa,E,A,Gamma,uu,u1,us,ugs,uc,Cforce,Cstrain);
 %allocate space for optimizaation program with an added angle value
+AA=[];
+b=[];
+Aeq=[];
+beq=[];
 nvars=1;
 lb=zeros(nvars,1);
 ub=lb;
 x0=lb;
 
-%set angle range
-arange=pi/4.; 
+
 % set to +/ 45 degrees
 x0(nvars)=0;
 lb(nvars)=-arange;
 ub(nvars)=arange;
-fprintf(out,'hybrid1 particle swarm - fixed point one angle with range %f\n',arange);
+
 % start analysis clock
 tic
 starttime=cputime;
+options = optimoptions('fmincon','Algorithm','interior-point','Display','iter','MaxFunctionEvaluations',30000000);
 iii=0;
-options = optimoptions('particleswarm','FunctionTolerance',1.e-6);
-[x,fval] =particleswarm(@funx,nvars,lb,ub,options) ;%defines a set of lower and upper bounds on the design variables, x, so that a solution is found in the range lbxub. (Set Aeq=[] and beq=[] if no linear equalities exist.)
-fprintf(out,' particle swarm solution min %15.10e max %15.10e  fvalue min %15.10e  time %s cpu time %f function evals %d\n', min(x(1)),max(x(1)),fval,toc,cputime-starttime,iii);
+[x,fval,exitflag,output] = fmincon(@funx,x0,AA,b,Aeq,beq,lb,ub,@nonlcon,options);
+
+
+
+fprintf(out,' fmin fp solution min %15.10e max %15.10e  fvalue min %15.10e  time %s cpu time %f function evals %d\n', min(x(1)),max(x(1)),fval,toc,cputime-starttime,iii);
 % iii=0;   make second value the total
 % tic;     make second value the total
 
-[x,fval] =particleswarm(@funy,nvars,lb,ub,options) ;%defines a set of lower and upper bounds on the design variables, x, so that a solution is found in the range lbxub. (Set Aeq=[] and beq=[] if no linear equalities exist.)
-fprintf(out,' particle swarm solution min %15.10e max %15.10e  fvalue max %15.10e  time %s cputime %f function evals %d\n', min(x(1)),max(x(1)),-fval,toc,cputime-starttime,iii);
+[x,fval,exitflag,output] = fmincon(@funy,x0,AA,b,Aeq,beq,lb,ub,@nonlcon,options); ;%defines a set of lower and upper bounds on the design variables, x, so that a solution is found in the range lbxub. (Set Aeq=[] and beq=[] if no linear equalities exist.)
+fprintf(out,' Fmin fp solution min %15.10e max %15.10e  fvalue max %15.10e  time %s cputime %f function evals %d\n', min(x(1)),max(x(1)),-fval,toc,cputime-starttime,iii);
 
 
 function disp=funx(optvar)
@@ -265,4 +273,8 @@ us = (Cm*ff-((temp4*temp3)*Del_alpha)+((temp4*temp3)*LambdaG*Del_gamma));
 %outifep(fid,strainflag,option,nnA,ndof,ndofA,ndofnew,ng,gamma1,gn,ne,elementA,Alfa,E,A,Gamma,uu,u1,us,ugs,uc,Cforce,Cstrain);
 return
 
+end
+function [c,ceq] = nonlcon(x)
+c = [];
+ceq = [ ];
 end

@@ -1,0 +1,10 @@
+hybrid1opt fmincon one angle with range 0.785398
+ fmincon solution min 1.9999578332e+02 max 2.0001514630e+02  fvalue min 3.3265172361e-05  time 1.136462e+00 cpu time 1.171875 function evals 498
+ particle swarm solution min 1.9999649974e+02 max 2.0000097253e+02  fvalue max 6.3516566905e-05  time 1.284174e+00 cpu time 1.453125 function evals 901
+
+Nodal information - optimization model
+Node   X      Y     Restraints       Fx          Fy           U-x    U-y
+ 1    0.0    0.0    0    0           0.0          0.0                    0               0
+ 2    1.0    0.0    1    0           0.0          0.0           2.5138827e-05               0
+ 3    0.0    0.8    1    1          10.0          0.0           9.0066808e-05      2.071046e-05
+ 4    1.0    0.8    1    1           0.0          0.0           6.3516567e-05      -1.5014575e-05

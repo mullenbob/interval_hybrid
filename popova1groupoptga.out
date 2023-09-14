@@ -1,10 +1,10 @@
 hybrid1optga genitic algorthim  one angle with range 0.785398
- ga solution min 1.9600000000e+02 max 2.0399999892e+02  fvalue min 3.1928774849e-05  time 2.608358e+01 cpu time 29.781250 function evals 91119
- ga solution min 1.9600000041e+02 max 2.0399999858e+02  fvalue max 6.5517083177e-05  time 5.536251e+01 cputime  function evals 182238
+ ga solution min 1.9600000345e+02 max 2.0399999871e+02  fvalue min 3.1928544388e-05  time 1.834681e+01 cpu time 20.500000 function evals 91119
+ ga solution min 1.9600000205e+02 max 2.0399999999e+02  fvalue max 6.5517615695e-05  time 3.464226e+01 cputime 37.234375 function evals 182238
 
 Nodal information - optimization model
 Node   X      Y     Restraints       Fx          Fy           U-x    U-y
  1    0.0    0.0    0    0           0.0          0.0                    0               0
- 2    1.0    0.0    1    0           0.0          0.0           2.5268654e-05               0
- 3    0.0    0.8    1    1          10.0          0.0           9.1500242e-05      2.1202808e-05
- 4    1.0    0.8    1    1           0.0          0.0           6.5508529e-05      -1.5517906e-05
+ 2    1.0    0.0    1    0           0.0          0.0           2.5273723e-05               0
+ 3    0.0    0.8    1    1          10.0          0.0           9.1510723e-05      2.1204302e-05
+ 4    1.0    0.8    1    1           0.0          0.0           6.551758e-05      -1.551734e-05
